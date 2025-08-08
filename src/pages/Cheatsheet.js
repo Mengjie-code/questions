@@ -15,8 +15,8 @@ export default function Cheatsheet({ }) {
         arrayMap: <ArrayMap />,
         arrayFilter: <ArrayFilter />,
         apply:<Apply />,
-        call:<Apply />,
-        curry:<Apply />,
+        call:<Call />,
+        curry:<Curry />,
         promiseMyall:<Apply />
 
     }
@@ -120,6 +120,53 @@ Function.prototype.myApply = function (thisArg, argsArray) {
 
   return result;
 };
+            `}
+            </SyntaxHighlighter>
+
+        </div>
+    );
+}
+
+function Curry({ }) {
+
+    return (
+        <div>
+            <SyntaxHighlighter
+                language="javascript"
+                style={dracula}>
+                {`
+export default function curry(func) {
+  return function curried(...args) {
+    if (args.length >= func.length) {
+      return func.apply(this, args);
+    }
+    return (arg) =>
+      arg === undefined
+        ? curried.apply(this, args)
+        : curried.apply(this, [...args, arg]);
+  };
+            `}
+            </SyntaxHighlighter>
+
+        </div>
+    );
+}
+
+function Call({ }) {
+
+    return (
+        <div>
+            <SyntaxHighlighter
+                language="javascript"
+                style={dracula}>
+                {`
+Function.prototype.myCall = function (thisArg, ...args) {
+    const key = Symbol('key');
+    thisArg[key] = this //func, who call this fucniton
+    const res = thisArg[key](...args)
+    delete thisArg[key]
+    return res;
+}
             `}
             </SyntaxHighlighter>
 
