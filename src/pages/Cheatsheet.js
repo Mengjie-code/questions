@@ -6,19 +6,23 @@ import { dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 export default function Cheatsheet({ }) {
 
-    const [currentAnswer, setCurrentAnswer] = useState('debounce');
+    const [currentAnswer, setCurrentAnswer] = useState('apply');
 
-    const renderList = ['apply','arrayFilter', 'arrayMap', 'call', 'curry', 'debounce', 'promiseMyall']
+    const renderList = ['apply','arrayFilter','arrayMap', 'arrayReduce','bubbleSort', 'call', 'curry', 'debounce', 'PromiseMyAll', 'PromiseMyAny', 'PromiseMyAllSettled', 'PromiseMyRace', 'throttle']
 
     const nameComponentMap = {
-        debounce: <Denounce />,
         arrayMap: <ArrayMap />,
         arrayFilter: <ArrayFilter />,
+        arrayReduce: <ArrayReduce />,
         apply:<Apply />,
         call:<Call />,
         curry:<Curry />,
-        promiseMyall:<Apply />
-
+        debounce: <Denounce />,
+        PromiseMyAll:<PromiseMyAll />,
+        PromiseMyRace:<PromiseMyRace />,
+        PromiseMyAny:<PromiseMyAny />,
+        PromiseMyAllSettled:<PromiseMyAllSettled />,
+        throttle:<Throttle />,
     }
 
 
@@ -34,6 +38,51 @@ export default function Cheatsheet({ }) {
                 {nameComponentMap[currentAnswer]}
             </div>
 
+
+        </div>
+    );
+}
+
+function Throttle({ }) {
+
+    return (
+        <div>
+            <SyntaxHighlighter
+                language="javascript"
+                style={dracula}>
+                {`
+/*run at most once per interval.   
+Throttling in JavaScript is a technique used to limit the rate at which a function can be executed. 
+This is particularly useful for events that fire frequently, 
+such as scroll, resize, or mousemove, to prevent excessive function calls and improve performance
+*/
+
+function throttle(func, delay) {
+  let timeoutId = null;
+  let lastArgs = null;
+  let lastThis = null;
+
+  return function(...args) {
+    lastArgs = args;
+    lastThis = this;
+
+    if (!timeoutId) {
+      // Execute the function immediately on the first call
+      func.apply(lastThis, lastArgs);
+
+      timeoutId = setTimeout(() => {
+        timeoutId = null; // Clear the timeout after the delay
+        if (lastArgs) { // If there were calls during the delay, execute the last one
+          func.apply(lastThis, lastArgs);
+          lastArgs = null;
+          lastThis = null;
+        }
+      }, delay);
+    }
+  };
+}
+            `}
+            </SyntaxHighlighter>
 
         </div>
     );
@@ -75,7 +124,13 @@ function ArrayMap({ }) {
 
     return (
         <div>
-            ArrayMap component
+            <SyntaxHighlighter
+                language="javascript"
+                style={dracula}>
+                {`
+// array map
+            `}
+            </SyntaxHighlighter>
 
         </div>
     );
@@ -85,11 +140,34 @@ function ArrayFilter({ }) {
 
     return (
         <div>
-            ArrayForEach component
+            <SyntaxHighlighter
+                language="javascript"
+                style={dracula}>
+                {`
+// array filter
+            `}
+            </SyntaxHighlighter>
 
         </div>
     );
 }
+
+function ArrayReduce({ }) {
+
+    return (
+        <div>
+            <SyntaxHighlighter
+                language="javascript"
+                style={dracula}>
+                {`
+// array reduce
+            `}
+            </SyntaxHighlighter>
+
+        </div>
+    );
+}
+
 
 function Apply({ }) {
 
@@ -173,3 +251,187 @@ Function.prototype.myCall = function (thisArg, ...args) {
         </div>
     );
 }
+
+function PromiseMyRace({ }) {
+
+    return (
+        <div>
+            <SyntaxHighlighter
+                language="javascript"
+                style={dracula}>
+                {`
+/*
+Input: An iterable (usually an array) of promises (or values).
+Output: A new promise.
+Behavior:
+Whichever promise resolves or rejects first determines the outcome.
+All other results are ignored once the first one settles.
+*/
+Promise.myRace = function (promises) {
+  // Write your code here.
+  return new Promise((resolve, reject)=>{
+    if(promises.length===0){
+      return 
+    }
+    promises.forEach(async promise=>{
+      // Promise.resolve(promise).then(resolve).catch(reject)
+      try{
+        const result = await promise
+        resolve(result)
+      }
+      catch(err){
+        reject(err)
+        
+      }
+    })
+  })
+};
+            `}
+            </SyntaxHighlighter>
+
+        </div>
+    );
+}
+
+function PromiseMyAll({ }) {
+
+    return (
+        <div>
+            <SyntaxHighlighter
+                language="javascript"
+                style={dracula}>
+                {`
+/*
+Input: An iterable (usually an array) containing multiple promises (or values).
+Output: A new promise.
+Behavior:
+All succeed → Resolves with an array of results, in the same order as the input.
+Any fails → Immediately rejects with the first rejection reason.
+*/
+Promise.myAll = function (promises) {
+  // Write your code here.
+    return new Promise((resolve, reject)=>{
+    if(promises.length===0){
+      return 
+    }
+    let result = []
+    let count = 0
+    promises.forEach((promise,i)=>{
+      Promise.resolve(promise).then(value=>{
+        count++
+        result[i] = value
+        if(count===promises.length){
+          resolve(result)
+        }
+        
+      }).catch(reject)
+    })
+  })
+};
+            `}
+            </SyntaxHighlighter>
+
+        </div>
+    );
+}
+
+function PromiseMyAny({ }) {
+
+    return (
+        <div>
+            <SyntaxHighlighter
+                language="javascript"
+                style={dracula}>
+                {`
+/*
+Input: An iterable (usually an array) of promises (or values).
+Output: A new promise.
+Behavior:
+Resolves with the value of the first fulfilled promise.
+Ignores rejections until one promise fulfills.
+If all promises reject, it rejects with an AggregateError containing all rejection reasons.
+*/
+Promise.myAny = function (promises) {
+  // Write your code here.
+    return new Promise((resolve, reject)=>{
+    if(promises.length===0){
+      reject(new AggregateError([])) 
+      return
+    }
+    const errorArray = []
+    let count = 0;
+    promises.forEach(promise=>{
+      Promise.resolve(promise).then(resolve).catch(err=>{
+        errorArray.push(err)
+        count++
+        if(count===promises.length){
+          //reject(new AggregateError(errorArray))
+           reject("all promises rejected")
+        }
+      })
+    })
+  })
+};
+            `}
+            </SyntaxHighlighter>
+
+        </div>
+    );
+}
+
+
+function PromiseMyAllSettled({ }) {
+
+    return (
+        <div>
+            <SyntaxHighlighter
+                language="javascript"
+                style={dracula}>
+                {`
+/*
+Input: An iterable (usually an array) of promises (or values).
+Output: A new promise.
+Behavior:
+Waits for all promises to finish, no matter if they succeed or fail.
+Always resolves (never rejects) with an array of result objects.
+Each result object has:
+status: "fulfilled" or "rejected"
+value: the resolved value (if fulfilled)
+reason: the error (if rejected)
+*/
+Promise.myAllSettled = function (promises) {
+  // Write your code here.
+    return new Promise((resolve, reject)=>{
+      if(promises.length===0){
+        resolve([]) 
+        return
+      }
+      const result = []
+      let count = 0
+      promises.forEach((promise,i)=>{
+        Promise.resolve(promise)
+          .then(value=>{
+            result[i] ={"status":"fulfilled", value}
+          })
+          .catch(error=>{
+             result[i] ={"status":"rejected", error}
+          })
+          .finally(()=>{
+            count++;
+            if(count===promises.length){
+              resolve(result)
+            }
+          })
+        
+      })
+    })
+  
+};
+            `}
+            </SyntaxHighlighter>
+
+        </div>
+    );
+}
+
+
